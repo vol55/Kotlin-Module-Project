@@ -1,5 +1,6 @@
 import java.util.Scanner
 
+
 class NotesConsoleApp {
     private val archives = mutableListOf<Archive>()
 
@@ -43,14 +44,22 @@ class NotesConsoleApp {
         return userText
     }
 
-    private fun createArchive() {
-
-        val archiveTitle = askForNonEmptyString(
-            "Введите название архива",
-            "Название архива не может быть пустым"
+    private fun createEntry(archiveIndex: Int?) {
+        val title = askForNonEmptyString(
+            "Введите название",
+            "Название не может быть пустым"
         )
-        archives.add(Archive(archiveTitle))
-        println("Архив $archiveTitle создан")
+        if (archiveIndex == null) {
+            archives.add(Archive(title))
+            println("Архив $title создан")
+            return
+        }
+        val content = askForNonEmptyString(
+            "Введите содержание заметки",
+            "Содержание заметки не может быть пустым"
+        )
+        archives[archiveIndex].notes.add(Note(title, content))
+        println("Заметка '$title' создана")
     }
 
     private fun showNotes(archiveIndex: Int) {
@@ -67,12 +76,12 @@ class NotesConsoleApp {
             "0" -> when {
                 archiveIndex != null && noteIndex != null -> showNotes(archiveIndex)
                 archiveIndex != null -> {
-                    createNote(archiveIndex)
+                    createEntry(archiveIndex)
                     showNotes(archiveIndex)
                 }
 
                 else -> {
-                    createArchive()
+                    createEntry(null)
                     showArchives()
                 }
             }
@@ -97,20 +106,6 @@ class NotesConsoleApp {
                 }
             }
         }
-    }
-
-
-    private fun createNote(archiveIndex: Int) {
-        val noteTitle = askForNonEmptyString(
-            "Введите название заметки",
-            "Название заметки не может быть пустым"
-        )
-        val noteContent = askForNonEmptyString(
-            "Введите содержание заметки",
-            "Содержание заметки не может быть пустым"
-        )
-        archives[archiveIndex].notes.add(Note(noteTitle, noteContent))
-        println("Заметка '$noteTitle' создана")
     }
 
     private fun showNoteContent(archiveIndex: Int, noteIndex: Int) {
