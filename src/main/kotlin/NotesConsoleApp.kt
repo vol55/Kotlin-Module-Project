@@ -1,7 +1,7 @@
 import java.util.Scanner
 
 class NotesConsoleApp {
-    val archives = mutableListOf<Archive>()
+    private val archives = mutableListOf<Archive>()
 
     fun showArchives() {
         printOptions(
@@ -9,23 +9,7 @@ class NotesConsoleApp {
             actions = listOf("Создать архив"),
             entries = archives,
         )
-        val numOfOptions = archives.size + 1
-        when (val userInput = getUserInput(numOfOptions)) {
-            "0" -> {
-                createArchive()
-                showArchives()
-            }
-
-            in "1"..(numOfOptions - 1).toString() -> {
-                showNotes(userInput.toInt() - 1)
-            }
-
-            numOfOptions.toString() -> println("Выход")
-            else -> {
-                println(userInput)
-                showArchives()
-            }
-        }
+        goNext(archives.size + 1, null, null)
     }
 
     private fun printOptions(message: String, actions: List<String>, entries: List<Entry>) {
@@ -75,24 +59,46 @@ class NotesConsoleApp {
             actions = listOf("Создать заметку"),
             entries = archives[archiveIndex].notes,
         )
-        val numOfOptions = archives[archiveIndex].notes.size + 1
+        goNext(archives[archiveIndex].notes.size + 1, archiveIndex, null)
+    }
+
+    private fun goNext(numOfOptions: Int, archiveIndex: Int?, noteIndex: Int?) {
         when (val userInput = getUserInput(numOfOptions)) {
-            "0" -> {
-                createNote(archiveIndex)
-                showNotes(archiveIndex)
+            "0" -> when {
+                archiveIndex != null && noteIndex != null -> showNotes(archiveIndex)
+                archiveIndex != null -> {
+                    createNote(archiveIndex)
+                    showNotes(archiveIndex)
+                }
+
+                else -> {
+                    createArchive()
+                    showArchives()
+                }
             }
 
-            in "1"..(numOfOptions - 1).toString() -> {
-                showNoteContent(archiveIndex, userInput.toInt() - 1)
+            in "1"..(numOfOptions - 1).toString() -> when {
+                archiveIndex != null -> showNoteContent(archiveIndex, userInput.toInt() - 1)
+                else -> showNotes(userInput.toInt() - 1)
             }
 
-            numOfOptions.toString() -> showArchives()
+            numOfOptions.toString() -> if (archiveIndex != null) showArchives() else println("Выход")
+
             else -> {
                 println(userInput)
-                showNotes(archiveIndex)
+                when {
+                    archiveIndex != null && noteIndex != null -> showNoteContent(
+                        archiveIndex,
+                        noteIndex
+                    )
+
+                    archiveIndex != null -> showNotes(archiveIndex)
+                    else -> showArchives()
+                }
             }
         }
     }
+
 
     private fun createNote(archiveIndex: Int) {
         val noteTitle = askForNonEmptyString(
@@ -114,12 +120,6 @@ class NotesConsoleApp {
             actions = listOf(),
             entries = listOf(),
         )
-        when (val userInput = getUserInput(0)) {
-            "0" -> showNotes(archiveIndex)
-            else -> {
-                println(userInput)
-                showNoteContent(archiveIndex, noteIndex)
-            }
-        }
+        goNext(0, archiveIndex, noteIndex)
     }
 }
