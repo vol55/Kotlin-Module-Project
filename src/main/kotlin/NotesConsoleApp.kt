@@ -104,8 +104,7 @@ class NotesConsoleApp {
             "Содержание заметки не может быть пустым"
         )
         archives[archiveIndex].notes.add(Note(noteTitle, noteContent))
-        println("Pfvtnrf '$noteTitle' создана")
-
+        println("Заметка '$noteTitle' создана")
     }
 
     private fun showNoteContent(archiveIndex: Int, noteIndex: Int) {
